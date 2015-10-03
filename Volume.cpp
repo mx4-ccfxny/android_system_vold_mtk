@@ -373,14 +373,20 @@ int Volume::mountVol() {
     char crypto_state[PROPERTY_VALUE_MAX];
     char encrypt_progress[PROPERTY_VALUE_MAX];
 
+	SLOGD("mountVol: hello (label=%s)", getLabel());
+
     property_get("vold.decrypt", decrypt_state, "");
     property_get("vold.encrypt_progress", encrypt_progress, "");
+	SLOGD("vold.decrypt = %s", decrypt_state);
+	SLOGD("vold.encrypt_progress = %s", encrypt_progress);
+	SLOGD("getState() = %d (%s)", getState(), stateToStr(getState()));
 
     /* Don't try to mount the volumes if we have not yet entered the disk password
      * or are in the process of encrypting.
      */
     if ((getState() == Volume::State_NoMedia) ||
         ((!strcmp(decrypt_state, "1") || encrypt_progress[0]) && providesAsec)) {
+		SLOGD("mountVol: early bail 1");
         snprintf(errmsg, sizeof(errmsg),
                  "Volume %s %s mount failed - no media",
                  getLabel(), getFuseMountpoint());
@@ -390,8 +396,10 @@ int Volume::mountVol() {
         errno = ENODEV;
         return -1;
     } else if (getState() != Volume::State_Idle) {
+		SLOGD("mountVol: early bail 2: getState() == %d", getState());
         errno = EBUSY;
         if (getState() == Volume::State_Pending) {
+			SLOGD("mountVol: will retry");
             mRetryMount = true;
         }
         return -1;
@@ -403,6 +411,8 @@ int Volume::mountVol() {
         // mCurrentlyMountedKdev = XXX
         return 0;
     }
+
+	SLOGD("mountVol: so far so good...");
 
     n = getDeviceNodes((dev_t *) &deviceNodes, 4);
     if (!n) {
@@ -458,6 +468,8 @@ int Volume::mountVol() {
             return -1;
         }
     }
+
+	SLOGD("mountVol: nice...");
 
     for (i = 0; i < n; i++) {
         char devicePath[255];

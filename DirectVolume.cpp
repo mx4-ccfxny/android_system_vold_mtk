@@ -246,12 +246,12 @@ void DirectVolume::handleDiskAdded(const char *devpath,
 
     if (mDiskNumParts == 0) {
 #ifdef PARTITION_DEBUG
-        SLOGD("Dv::diskIns - No partitions - good to go son!");
+        SLOGD("Dv::diskIns - No partitions - good to go son! (devpath=%s, mountpoint=%s)", devpath, mMountpoint);
 #endif
         setState(Volume::State_Idle);
     } else {
 #ifdef PARTITION_DEBUG
-        SLOGD("Dv::diskIns - waiting for %d pending partitions", mPendingPartCount);
+        SLOGD("Dv::diskIns - waiting for %d pending partitions (devpath=%s, mountpoint=%s)", mPendingPartCount, devpath, mMountpoint);
 #endif
         setState(Volume::State_Pending);
     }
@@ -272,7 +272,7 @@ void DirectVolume::handlePartitionAdded(const char *devpath, NetlinkEvent *evt) 
         part_num = 1;
     }
 
-    SLOGD("DirectVolume::handlePartitionAdded -> MAJOR %d, MINOR %d, PARTN %d\n", major, minor, part_num);
+    SLOGD("DirectVolume::handlePartitionAdded -> MAJOR %d, MINOR %d, PARTN %d (mountpoint=%s)\n", major, minor, part_num, mMountpoint);
 
     if (part_num > MAX_PARTITIONS || part_num < 1) {
         SLOGE("Invalid 'PARTN' value");

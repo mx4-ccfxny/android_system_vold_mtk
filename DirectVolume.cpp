@@ -222,7 +222,7 @@ int DirectVolume::handleBlockEvent(NetlinkEvent *evt) {
     return -1;
 }
 
-void DirectVolume::handleDiskAdded(const char * /*devpath*/,
+void DirectVolume::handleDiskAdded(const char *devpath,
                                    NetlinkEvent *evt) {
     mDiskMajor = atoi(evt->findParam("MAJOR"));
     mDiskMinor = atoi(evt->findParam("MINOR"));
@@ -234,6 +234,13 @@ void DirectVolume::handleDiskAdded(const char * /*devpath*/,
         SLOGW("Kernel block uevent missing 'NPARTS'");
         mDiskNumParts = 1;
     }
+
+#ifdef MTK_HARDWARE
+	if (strstr(devpath, "mmcblk0boot") || strstr(devpath, "mmcblk0rpmb")) {
+		SLOGD("ignoring MTK raw partition %s", devpath);
+		return;
+	}
+#endif
 
     mPendingPartCount = mDiskNumParts;
 

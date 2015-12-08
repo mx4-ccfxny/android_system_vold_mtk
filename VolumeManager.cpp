@@ -288,6 +288,14 @@ void VolumeManager::handleBlockEvent(NetlinkEvent *evt) {
 
     if (devType != "disk") return;
 
+#ifdef MTK_HARDWARE
+    std::string devName(evt->findParam("DEVNAME"));
+    if (devName == "mmcblk0boot0" || devName == "mmcblk0boot1" || devName == "mmcblk0rpmb") {
+        LOG(DEBUG) << "Ignoring MTK raw partition " << devName;
+        return;
+    }
+#endif
+
     int major = atoi(evt->findParam("MAJOR"));
     int minor = atoi(evt->findParam("MINOR"));
     dev_t device = makedev(major, minor);
